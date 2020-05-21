@@ -1,0 +1,67 @@
+{
+    "bothandler" : {
+        "input_login_id" : "Input DSM Login ID",
+        "input_login_pw" : "Input DSM Login Password\nDelete password after received message",
+        "input_login_otp" : "Input DSM OTP Number",
+        "dsm_login_api_fail" : "Login fail\n, error code : %d",
+        "dsm_rest_api_fail" : "Request Login fail\n, response code : %d",
+        "dsm_api_res_empty" : "DSM API response is empty",
+        "dsm_session_expire" : "DSM Login Fail\nsession expired.",
+        "dsm_invalid_id_pw" : "DSM Login Fail\nInvalid ID or Password",
+        "dsm_account_disable" : "DSM Login Fail\nAccount Disabled",
+        "dsm_login_succ" : "DS Login Success\nStarting Synobot...",
+        "dsm_login_fail_exit" : "DSM Login Fail.\nExit synobot.",
+        "dsm_try_login" : "Try DSM Login...",
+        "noti_delete_pw" : "Deleteed Password Message.",
+        "noti_delete_otp" : "Deleted OTP Message",
+        "noti_magnet_link" : "Added task magnet link",
+        "noti_torrent_file" : "Added task torrent file(%s).",
+        "noti_not_support_cmd" : "Not support command",
+        "noti_not_torrent_file" : "Only torrent files are supported, File : %s",
+        "noti_torrent_status" : "*Status* : %s\n*File* : %s\n*Size* : %s\n*User* : %s"
+    },
+    "synods" :{
+        "task_status" : "Status",
+        "task_name" : "File Name",
+        "task_size" : "File Size",
+        "task_user" : "User",
+        "waiting": "waiting",
+        "downloading": "downloading",
+        "paused": "paused",
+        "finishing": "finishing",
+        "finished": "finished",
+        "hash_checking": "hash checking",
+        "seeding": "seeding",
+        "filehosting_waiting": "file hosting waiting",
+        "extracting": "extracting",
+        "error": "error",
+        "delete": "delete"
+    },
+    "syno_error" : {
+        "100" : "",
+        "101" : "Invalid parameter",
+        "102" : "The requested API does not exist",
+        "103" : "The requested method does not exist",
+        "104" : "The requested version does not support the functionality",
+        "105" : "The logged in session does not have permission",
+        "106" : "Session timeout",
+        "107" : "Session interrupted by duplicate login"
+    },
+    "syno_auth_error" : {
+        "400" : "No such account or incorrect password",
+        "401" : "Account disabled",
+        "402" : "Permission denied",
+        "403" : "2-step verification code required",
+        "404" : "Failed to authenticate 2-step verification code"
+    },
+    "syno_task_error" : {
+        "400" : "Unknown Error",
+        "401" : "Invalid parameter",
+        "402" : "Parse the user setting failed",
+        "403" : "Get category failed",
+        "404" : "Get the search result from DB failed",
+        "405" : "Get the user setting failed"
+    }
+}
+
+
