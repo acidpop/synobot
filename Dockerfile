@@ -26,7 +26,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./*.py ./
-COPY ./ko_kr.json ./
+COPY ./*.json ./
 
 CMD [ "python", "./main.py" ]
 
