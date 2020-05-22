@@ -102,5 +102,6 @@ class TaskMgr(single.SingletonInstane):
             log.info("delete task : %s", task_id)
             del self.task_data[task_id]
 
+        self.SaveTask()
 
 

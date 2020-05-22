@@ -190,7 +190,7 @@ class SynoDownloadStation(single.SingletonInstane):
         files = {'file' : open(file_path, 'rb')}
 
         try:
-            res = requests.post(create_url, data=params2, files=files, cookies=self.auth_cookie)
+            res = requests.post(create_url, data=params2, files=files, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
         except requests.ConnectionError:
             log.error('CreateTaskForFile|synology rest api request Connection Error')
             return False

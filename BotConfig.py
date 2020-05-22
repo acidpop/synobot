@@ -32,6 +32,8 @@ class BotConfig(single.SingletonInstane):
     dsm_retry_login = 10
     # 작업 완료시 자동 삭제 여부
     dsm_task_auto_delete = False
+    # 로컬라이징
+    synobot_lang = 'ko_kr'
 
     execute_path = ""
     host_name = ''
@@ -71,6 +73,8 @@ class BotConfig(single.SingletonInstane):
         temp_val = os.environ.get('DSM_AUTO_DEL', '0')
         if temp_val == '1':
             self.dsm_task_auto_delete = True
+
+        self.synobot_lang = os.environ.get('TG_LANG', 'ko_kr')
 
         temp_path = os.path.split(sys.argv[0])
         self.execute_path = temp_path[0]
@@ -125,4 +129,7 @@ class BotConfig(single.SingletonInstane):
 
     def IsTaskAutoDel(self):
         return self.dsm_task_auto_delete
+
+    def GetSynobotLang(self):
+        return self.synobot_lang
 
