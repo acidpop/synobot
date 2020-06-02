@@ -1,5 +1,5 @@
 # Synobot Docker build
-# docker build -t synobot:0.8 .
+# docker build -t synobot:0.9 .
 
 FROM python:3-slim
 MAINTAINER Acidpop <https://github.com/acidpop>

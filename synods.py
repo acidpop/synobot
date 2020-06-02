@@ -275,7 +275,8 @@ class SynoDownloadStation(single.SingletonInstane):
         log.info('Task Monitor : %s, %s, %s, %s, %s' % (task_id, title, CommonUtil.hbytes(size), user, status) )
         #msg = '*상태* : %s\n*이름* : %s\n*크기* : %s\n*사용자* : %s' % ( self.StatusTranslate(status), title, CommonUtil.hbytes(size), user)
         msg = self.lang.GetBotHandlerLang('noti_torrent_status') % ( self.StatusTranslate(status), title, CommonUtil.hbytes(size), user)
-        self.SendNotifyMessage(msg, ParseMode = 'mark')
+        #self.SendNotifyMessage(msg, ParseMode = 'mark')
+        self.SendNotifyMessage(msg)
 
 
     def StatusTranslate(self, status):
