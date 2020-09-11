@@ -12,13 +12,18 @@
         "dsm_login_succ" : "DS Login 성공\nSynobot을 시작합니다.",
         "dsm_login_fail_exit" : "DSM Login에 실패 하였습니다.\n프로그램이 종료됩니다",
         "dsm_try_login" : "DSM 로그인을 시도합니다.",
+        "dsm_not_login" : "DSM 에 로그인 되어 있지 않습니다",
+        "dsm_task_list" : "다운로드 스테이션 작업 목록을 가져옵니다.",
+        "dsm_statistic" : "다운로드 스테이션의 네트워크 정보를 가져옵니다.",
         "noti_delete_pw" : "입력 된 암호 메시지를 삭제 하였습니다",
         "noti_delete_otp" : "입력 된 OTP 메시지를 삭제 하였습니다",
         "noti_magnet_link" : "마그넷 링크를 등록하였습니다",
         "noti_torrent_file" : "토렌트 파일(%s)을 등록 하였습니다",
         "noti_not_support_cmd" : "지원 되지 않는 명령입니다",
         "noti_not_torrent_file" : "torrent 파일만 지원합니다, 파일 : %s",
-        "noti_torrent_status" : "*상태* : %s\n*이름* : %s\n*크기* : %s\n*사용자* : %s"
+        "noti_torrent_status" : "상태 : %s\n이름 : %s\n크기 : %s\n사용자 : %s",
+        "noti_task_list" : "TaskID : %s\n이름 : %s\n크기 : %s\n상태 : %s\n다운로드 됨 : %s\n업로드 됨 : %s\n다운로드 속도 : %s/s\n업로드 속도 : %s/s",
+        "noti_statistic" : "다운로드 스테이션 정보\n다운로드 속도:%s/s\n업로드 속도 : %s/s"
     },
     "synods" :{
         "task_status" : "상태",

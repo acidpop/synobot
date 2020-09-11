@@ -35,6 +35,16 @@ class BotHandler(single.SingletonInstane):
 
     try_login_cnt = 0
 
+    # SynoBot Command
+    """
+    /dslogin
+    /cancel
+    /task
+    /stat
+    /
+    """
+    synobot_cmd_list = "/dslogin\n/task\n/stat"
+
     def InitBot(self):
         self.cfg = BotConfig.BotConfig().instance()
         self.valid_users = self.cfg.GetValidUser()
@@ -55,13 +65,8 @@ class BotHandler(single.SingletonInstane):
         dp.add_handler(CommandHandler("help", self.help))
         #dp.add_handler(CommandHandler("systeminfo", self.systeminfo))
         dp.add_handler(CommandHandler("dslogin", self.dslogin))
-
-        # SynoBot Command
-        """
-        /dslogin
-        /cancel
-        /
-        """
+        dp.add_handler(CommandHandler("task", self.TaskList))
+        dp.add_handler(CommandHandler("stat", self.Statistic))
 
         # on noncommand i.e message - echo the message on Telegram
         dp.add_handler(MessageHandler(Filters.text, self.msg_handler))
@@ -244,7 +249,7 @@ class BotHandler(single.SingletonInstane):
         if self.CheckValidUser(update.message.from_user.id) == False:
             return
 
-        update.message.reply_text('Help!')
+        update.message.reply_text(self.synobot_cmd_list)
 
     #def systeminfo(self, update, context):
     #    if self.CheckValidUser(update.message.from_user.id) == False:
@@ -267,6 +272,36 @@ class BotHandler(single.SingletonInstane):
         #update.message.reply_text('로그인 ID를 입력하세요')
         #update.message.reply_text(self.lang.GetBotHandlerLang('input_login_id'))
         self.StartDsmLogin()
+
+        return
+
+    def TaskList(self, update, context):
+        if self.CheckValidUser(update.message.from_user.id) == False:
+            return
+
+        if self.ds.auth_cookie == None:
+            update.message.reply_text(self.lang.GetBotHandlerLang('dsm_not_login'))
+            return
+
+        #update.message.reply_text('다운로드 스테이션 작업 목록을 가져옵니다')
+        update.message.reply_text(self.lang.GetBotHandlerLang('dsm_task_list'))
+        self.ds.GetTaskDetail()
+
+        return
+
+    def Statistic(self, update, context):
+        if self.CheckValidUser(update.message.from_user.id) == False:
+            return
+
+        if self.ds.auth_cookie == None:
+            update.message.reply_text(self.lang.GetBotHandlerLang('dsm_not_login'))
+            return
+
+        #update.message.reply_text('다운로드 스테이션의 네트워크 정보를 가져옵니다.')
+        update.message.reply_text(self.lang.GetBotHandlerLang('dsm_statistic'))
+        self.ds.GetStatistic()
+
+        return
 
     def current_mode_handle(self, update, context):
         command = update.message.text
@@ -327,6 +362,8 @@ class BotHandler(single.SingletonInstane):
             # Send Help Message
             #update.message.reply_text('지원 되지 않는 명령입니다')
             update.message.reply_text(self.lang.GetBotHandlerLang('noti_not_support_cmd'))
+            #synobot_cmd_list
+            update.message.reply_text(self.synobot_cmd_list)
 
 
     def file_handler(self, update, context):

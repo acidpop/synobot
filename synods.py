@@ -93,10 +93,10 @@ class SynoDownloadStation(single.SingletonInstane):
         if not otp_code:
             # Not Use OTP Code
             log.info('without otp')
-            params = {'api' : 'SYNO.API.Auth', 'version' : '2', 'method' : 'login' , 'account' : id, 'passwd' : pw, 'session' : 'DownloadStation', 'format' : 'cookie'}
+            params = {'api' : 'SYNO.API.Auth', 'version' : '3', 'method' : 'login' , 'account' : id, 'passwd' : pw, 'session' : 'DownloadStation', 'format' : 'cookie'}
         else:
             log.info('with otp')
-            params = {'api' : 'SYNO.API.Auth', 'version' : '2', 'method' : 'login' , 'account' : id, 'passwd' : pw, 'session' : 'DownloadStation', 'format' : 'cookie', 'otp_code' : otp_code}
+            params = {'api' : 'SYNO.API.Auth', 'version' : '3', 'method' : 'login' , 'account' : id, 'passwd' : pw, 'session' : 'DownloadStation', 'format' : 'cookie', 'otp_code' : otp_code}
 
         log.info('Request url : %s', url)
 
@@ -120,7 +120,7 @@ class SynoDownloadStation(single.SingletonInstane):
         if self.auth_cookie == None:
             return False
 
-        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '1', 'method' : 'list'}
+        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '3', 'method' : 'list'}
 
         url = self.cfg.GetDSDownloadUrl() + '/webapi/DownloadStation/task.cgi'
 
@@ -164,6 +164,138 @@ class SynoDownloadStation(single.SingletonInstane):
 
         return True
 
+    def GetTaskDetail(self):
+        #url = 'https://downloadstation_dsm_url:9999/webapi/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=list&additional=detail,file,transfer'
+
+        if self.auth_cookie == None:
+            return False
+
+        log.info('try task list detail')
+
+        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '3', 'method' : 'list', 'additional' : 'detail,file,transfer'}
+
+        url = self.cfg.GetDSDownloadUrl() + '/webapi/DownloadStation/task.cgi'
+
+        try:
+            res = requests.get(url, params=params, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
+        except requests.ConnectionError:
+            log.error('GetTaskList|synology rest api request Connection Error')
+            return False
+        except:
+            log.error('GetTaskList|synology requests fail')
+            return False
+
+        log.info('complete task list detail')
+
+        if res.status_code != 200:
+            log.warn("Get Task List Request fail")
+            return False
+
+        json_data = json.loads(res.content.decode('utf-8'))
+
+        if self.ChkTaskResponse(json_data, "Download station api fail") == False:
+            self.auth_cookie = None
+            log.info('ChkTaskResponse fail')
+            return False
+
+        # Json 분석 후 다운로드 리스트 보내기
+        # 보낼 데이터, Task ID, 파일이름, 파일 크기, 다운로드 된 크기, 진행 상태, 업스피드, 다운스피드, 상태
+        log.info("Task : %s", json_data['data']['tasks'])
+
+        for item in json_data['data']['tasks']:
+            # size 가 0 보다 큰 값인 경우에만 Torrent 정보가 정상적으로 확인 된다.
+            tor_size = int(item['size'])
+            # item 정보
+            # id : Task ID
+            # size : 파일 전체 크기
+            # status : 진행 상태
+            # title : 토렌트 제목
+
+            # item['additional']['transfer']
+            # size_downloaded : 다운로드 된 크기
+            # size_uploaded : 업로드 된 크기
+            # speed_download : 다운로드 속도(단위/s)
+            # speed_upload : 업로드 속도 (단위/s)
+            tor_id          = item['id']
+            tor_status      = item['status']
+            tor_title       = item['title']
+
+            tor_size_download = 0
+            tor_size_upload = 0
+            tor_speed_down = 0
+            tor_speed_up = 0
+
+            if tor_size <= 0:
+                self.SendTaskList(tor_id, tor_size, tor_status, tor_title, tor_size_download, tor_size_upload, tor_speed_down, tor_speed_up)
+                return True
+            
+            # additional 아이템이 없다면 0 정보 전송
+            if 'additional' in item == False:
+                self.SendTaskList(tor_id, tor_size, tor_status, tor_title, tor_size_download, tor_size_upload, tor_speed_down, tor_speed_up)
+                return True
+
+            # transfer 아이템이 없다면 0 정보 전송
+            if 'transfer' in item['additional'] == False:
+                self.SendTaskList(tor_id, tor_size, tor_status, tor_title, tor_size_download, tor_size_upload, tor_speed_down, tor_speed_up)
+                return True
+
+            transfer_item = item['additional']['transfer']
+            tor_size_download = transfer_item['size_downloaded']
+            tor_size_upload = transfer_item['size_uploaded']
+            tor_speed_down = transfer_item['speed_download']
+            tor_speed_up = transfer_item['speed_upload']
+
+            self.SendTaskList(tor_id, tor_size, tor_status, tor_title, tor_size_download, tor_size_upload, tor_speed_down, tor_speed_up)
+
+        log.info('success Task List')
+
+        return True
+
+    def GetStatistic(self):
+        # param = {'api' : 'SYNO.DownloadStation.Statistic', 'version' : '1', 'method' : 'getinfo'}
+        # url = 'https://downloadstation_dsm_url:9999/webapi/DownloadStation/statistic.cgi'
+        if self.auth_cookie == None:
+            return False
+
+        log.info('try get statistic')
+
+        params =  {'api' : 'SYNO.DownloadStation.Statistic', 'version' : '1', 'method' : 'getinfo'}
+
+        url = self.cfg.GetDSDownloadUrl() + '/webapi/DownloadStation/statistic.cgi'
+
+        try:
+            res = requests.get(url, params=params, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
+        except requests.ConnectionError:
+            log.error('GetStatistic|synology rest api request Connection Error')
+            return False
+        except:
+            log.error('GetStatistic|synology requests fail')
+            return False
+
+        log.info('GetStatistic|complete get statistic')
+
+        if res.status_code != 200:
+            log.warn("GetStatistic|Get statistic Request fail")
+            return False
+
+        json_data = json.loads(res.content.decode('utf-8'))
+
+        if self.ChkTaskResponse(json_data, "Download station api fail") == False:
+            self.auth_cookie = None
+            log.info('GetStatistic|ChkTaskResponse fail')
+            return False
+
+        # Data sample : {"data":{"speed_download":3496632,"speed_upload":0},"success":true}
+        item = json_data.get('data')
+        if item != None:
+            download_speed = item['speed_download']
+            upload_speed = item['speed_upload']
+            self.SendStatistic(download_speed, upload_speed)
+        else:
+            log.info('GetStatistic|not found data, %s', res.content)
+
+        return True
+
     def TaskAutoDelete(self, task_items):
         delete_task_id_arr = []
 
@@ -185,7 +317,7 @@ class SynoDownloadStation(single.SingletonInstane):
     def CreateTaskForFile(self, file_path):
         create_url = self.cfg.GetDSDownloadUrl() + '/webapi/DownloadStation/task.cgi'
 
-        params2 = {'api' : 'SYNO.DownloadStation.Task', 'version' : '2', 'method' : 'create' }
+        params2 = {'api' : 'SYNO.DownloadStation.Task', 'version' : '3', 'method' : 'create' }
 
         files = {'file' : open(file_path, 'rb')}
 
@@ -218,7 +350,7 @@ class SynoDownloadStation(single.SingletonInstane):
     def CreateTaskForUrl(self, url):
         create_url = self.cfg.GetDSDownloadUrl() + '/webapi/DownloadStation/task.cgi'
 
-        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '1', 'method' : 'create' , 'uri' : url}
+        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '3', 'method' : 'create' , 'uri' : url}
 
         try:
             res = requests.get(create_url, params=params, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
@@ -243,7 +375,7 @@ class SynoDownloadStation(single.SingletonInstane):
     def DeleteTask(self, task_id):
         delete_url = self.cfg.GetDSDownloadUrl() + '/webapi/DownloadStation/task.cgi'
 
-        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '1', 'method' : 'delete' , 'id' : task_id}
+        params = {'api' : 'SYNO.DownloadStation.Task', 'version' : '3', 'method' : 'delete' , 'id' : task_id}
 
         try:
             res = requests.get(delete_url, params=params, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
@@ -277,6 +409,31 @@ class SynoDownloadStation(single.SingletonInstane):
         msg = self.lang.GetBotHandlerLang('noti_torrent_status') % ( self.StatusTranslate(status), title, CommonUtil.hbytes(size), user)
         #self.SendNotifyMessage(msg, ParseMode = 'mark')
         self.SendNotifyMessage(msg)
+
+    def SendTaskList(self, task_id, task_size, task_status, task_title, download_size, upload_size, download_speed, upload_speed):
+        log.info("Task Noti")
+        bot = bothandler.BotHandler().instance().bot
+
+        if bot == None:
+            log.info("Bot instance is none")
+            return
+
+        log.info('Task Detail : %s, %s, %s, %s, %s, %s, %s, %s' % ( task_id, task_title, CommonUtil.hbytes(task_size), self.StatusTranslate(task_status), CommonUtil.hbytes(download_size), CommonUtil.hbytes(upload_size), CommonUtil.hbytes(download_speed), CommonUtil.hbytes(upload_speed) ) )
+        msg = self.lang.GetBotHandlerLang('noti_task_list') % ( task_id, task_title, CommonUtil.hbytes(task_size), self.StatusTranslate(task_status), CommonUtil.hbytes(download_size), CommonUtil.hbytes(upload_size), CommonUtil.hbytes(download_speed), CommonUtil.hbytes(upload_speed) )
+        self.SendNotifyMessage(msg)
+
+    def SendStatistic(self, download_speed, upload_speed):
+        log.info("Statistic Noti")
+        bot = bothandler.BotHandler().instance().bot
+
+        if bot == None:
+            log.info("Bot instance is none")
+            return
+
+        log.info('Statistic : %s, %s' % ( CommonUtil.hbytes(download_speed), CommonUtil.hbytes(upload_speed) ) )
+        msg = self.lang.GetBotHandlerLang('noti_statistic') % ( CommonUtil.hbytes(download_speed), CommonUtil.hbytes(upload_speed) )
+        self.SendNotifyMessage(msg)
+        return
 
 
     def StatusTranslate(self, status):

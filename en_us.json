@@ -12,13 +12,18 @@
         "dsm_login_succ" : "DS Login Success\nStarting Synobot...",
         "dsm_login_fail_exit" : "DSM Login Fail.\nExit synobot.",
         "dsm_try_login" : "Try DSM Login...",
+        "dsm_not_login" : "DSM Not Login...",
+        "dsm_task_list" : "Get Download station task list.",
+        "dsm_statistic" : "Get Download station statistic.",
         "noti_delete_pw" : "Deleteed Password Message.",
         "noti_delete_otp" : "Deleted OTP Message",
         "noti_magnet_link" : "Added task magnet link",
         "noti_torrent_file" : "Added task torrent file(%s).",
         "noti_not_support_cmd" : "Not support command",
         "noti_not_torrent_file" : "Only torrent files are supported, File : %s",
-        "noti_torrent_status" : "*Status* : %s\n*File* : %s\n*Size* : %s\n*User* : %s"
+        "noti_torrent_status" : "*Status* : %s\n*File* : %s\n*Size* : %s\n*User* : %s",
+        "noti_task_list" : "TaskID : %s\nFile : %s\nTotal Size : %s\nStatus : %s\nDownload Size : %s\nUpload Size : %s\ndownload Speed : %s/s\nUpload Speed : %s/s",
+        "noti_statistic" : "Info Download Station\nDownload Speed:%s/s\nUpload Speed : %s/s"
     },
     "synods" :{
         "task_status" : "Status",
