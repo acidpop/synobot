@@ -34,6 +34,8 @@ class BotConfig(single.SingletonInstane):
     dsm_task_auto_delete = False
     # 로컬라이징
     synobot_lang = 'ko_kr'
+    # Torrent Watch Direcotry
+    tor_watch_path = ''
 
     execute_path = ""
     host_name = ''
@@ -75,6 +77,8 @@ class BotConfig(single.SingletonInstane):
             self.dsm_task_auto_delete = True
 
         self.synobot_lang = os.environ.get('TG_LANG', 'ko_kr')
+
+        self.tor_watch_path = os.environ.get('DSM_WATCH', '')
 
         temp_path = os.path.split(sys.argv[0])
         self.execute_path = temp_path[0]
@@ -132,4 +136,7 @@ class BotConfig(single.SingletonInstane):
 
     def GetSynobotLang(self):
         return self.synobot_lang
+
+    def GetTorWatch(self):
+        return self.tor_watch_path
 

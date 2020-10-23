@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import os
+import shutil
 import requests
 import json
 import telegram
@@ -79,11 +80,40 @@ class SynoDownloadStation(single.SingletonInstane):
             # msg = 'DSM 작업 실패\n%s\n%s' % (errstr, log_body)
 
             log.info(msg)
-            self.SendNotifyMessage(msg)
+            log.info(result_json)
+
+            if errcode != 100:
+                self.SendNotifyMessage(msg)
 
             return False
         except:
             log.info('ChkTaskResponse Exception')
+            return False
+
+        return False
+
+    def ChkAPIResponse(self, result_json, log_body):
+        if not result_json:
+            log.info('check API response fail, result json data is empty')
+            return False
+
+        try:
+            if result_json['success'] == True:
+                return True
+
+            errcode = result_json['error']['code']
+
+            errstr = self.GetErrorTaskCode(errcode)
+            msg = self.lang.GetBotHandlerLang('dsm_rest_api_fail') % (errstr, log_body)
+            # msg = 'DSM 작업 실패\n%s\n%s' % (errstr, log_body)
+
+            log.info(msg)
+            log.info(result_json)
+            self.SendNotifyMessage(msg)
+
+            return False
+        except:
+            log.info('ChkAPIResponse Exception')
             return False
 
         return False
@@ -143,7 +173,7 @@ class SynoDownloadStation(single.SingletonInstane):
 
         json_data = json.loads(res.content.decode('utf-8'))
 
-        if self.ChkTaskResponse(json_data, "Download station api fail") == False:
+        if self.ChkTaskResponse(json_data, "GetTaskList Download station api fail") == False:
             self.auth_cookie = None
             return False
 
@@ -193,9 +223,9 @@ class SynoDownloadStation(single.SingletonInstane):
 
         json_data = json.loads(res.content.decode('utf-8'))
 
-        if self.ChkTaskResponse(json_data, "Download station api fail") == False:
+        if self.ChkAPIResponse(json_data, "Download station api fail") == False:
             self.auth_cookie = None
-            log.info('ChkTaskResponse fail')
+            log.info('ChkAPIResponse fail')
             return False
 
         # Json 분석 후 다운로드 리스트 보내기
@@ -280,9 +310,9 @@ class SynoDownloadStation(single.SingletonInstane):
 
         json_data = json.loads(res.content.decode('utf-8'))
 
-        if self.ChkTaskResponse(json_data, "Download station api fail") == False:
+        if self.ChkAPIResponse(json_data, "Download station api fail") == False:
             self.auth_cookie = None
-            log.info('GetStatistic|ChkTaskResponse fail')
+            log.info('GetStatistic|ChkAPIResponse fail')
             return False
 
         # Data sample : {"data":{"speed_download":3496632,"speed_upload":0},"success":true}
@@ -322,6 +352,7 @@ class SynoDownloadStation(single.SingletonInstane):
         files = {'file' : open(file_path, 'rb')}
 
         try:
+            log.info("url:%s, data:%s, files:%s, cookies:%s", create_url, params2, files, self.auth_cookie)
             res = requests.post(create_url, data=params2, files=files, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
         except requests.ConnectionError:
             log.error('CreateTaskForFile|synology rest api request Connection Error')
@@ -336,7 +367,7 @@ class SynoDownloadStation(single.SingletonInstane):
             return False
 
         json_data = json.loads(res.content.decode('utf-8'))
-        if self.ChkTaskResponse(json_data, "Download station Create Task for file") == False:
+        if self.ChkAPIResponse(json_data, "Download station Create Task for file") == False:
             return False
 
         # Remove Torrent File
@@ -345,6 +376,40 @@ class SynoDownloadStation(single.SingletonInstane):
         log.info('Torrent File removed, file:%s', file_path)
 
         return True
+
+
+    def CreateTaskForFileToWatchDir(self, file_path):
+        watch_path = self.cfg.GetTorWatch()
+
+        if len(watch_path) <= 0:
+            log.info("watch path is not define")
+            # DSM_WATCH 환경 변수 등록 알림, noti_torrent_watch_nothing
+
+            msg = self.lang.GetBotHandlerLang('noti_torrent_watch_nothing')
+
+            self.SendNotifyMessage(msg)
+
+            return False
+
+        try:
+            shutil.move(file_path, watch_path)
+        except FileNotFoundError:
+            log.info('Torrent file move fail, No such file or directory')
+
+            msg = self.lang.GetBotHandlerLang('noti_torrent_watch_mv_fail')
+            self.SendNotifyMessage(msg)
+            return False
+        except:
+            log.info('Torrent file move fail, error')
+
+            msg = self.lang.GetBotHandlerLang('noti_torrent_watch_mv_fail')
+            self.SendNotifyMessage(msg)
+            return False
+
+        log.info("Torrent file move to torrent watch directory, watch:%s", watch_path)
+
+        return True
+
 
     # HTTP/FTP/magnet/ED2K link
     def CreateTaskForUrl(self, url):
@@ -366,7 +431,7 @@ class SynoDownloadStation(single.SingletonInstane):
             return False
 
         json_data = json.loads(res.content.decode('utf-8'))
-        if self.ChkTaskResponse(json_data, "Download station Create Task for url") == False:
+        if self.ChkAPIResponse(json_data, "Download station Create Task for url") == False:
             return False
 
         return True
@@ -391,7 +456,7 @@ class SynoDownloadStation(single.SingletonInstane):
             return False
 
         json_data = json.loads(res.content.decode('utf-8'))
-        if self.ChkTaskResponse(json_data, "Download station Delete Task") == False:
+        if self.ChkAPIResponse(json_data, "Download station Delete Task") == False:
             return False
 
         return True
@@ -450,4 +515,46 @@ class SynoDownloadStation(single.SingletonInstane):
 
     def GetErrorTaskCode(self, code):
         return self.lang.GetSynoTaskErrorLang( str(code) )
+
+"""
+    # 해당 코드는 현재 작동 안함.
+    def CreateTaskForFileDSM7(self, file_path):
+        create_url = self.cfg.GetDSDownloadUrl() + '/webapi/entry.cgi'
+
+        stat = os.stat(file_path)
+
+        #torrent_file = open(file_path, 'rb')
+
+        params2 = {'api' : 'SYNO.DownloadStation2.Task', 'version' : '2', 'method' : 'create' , 'type' : 'file', 'create_list' : True, 'destination' : '/volume1/download/torrent', 'username' : 'userid' , 'password' : 'userpassword', 'mtime' : stat.st_mtime, 'size' : stat.st_size}
+
+        torrent_file = {'file' : open(file_path, 'rb')}
+        
+
+        try:
+            log.info("url:%s, data:%s, files:%s, cookies:%s", create_url, params2, file_path, self.auth_cookie)
+            res = requests.post(create_url, data=params2, files=torrent_file, cookies=self.auth_cookie, verify=self.cfg.IsUseCert())
+        except requests.ConnectionError:
+            log.error('CreateTaskForFile|synology rest api request Connection Error')
+            return False
+        except:
+            log.error('CreateTaskForFile|synology requests fail')
+            return False
+
+        if res.status_code != 200:
+            # print('request fail')
+            log.warn("Create Task For File Request fail")
+            return False
+
+        json_data = json.loads(res.content.decode('utf-8'))
+        if self.ChkAPIResponse(json_data, "Download station Create Task for file") == False:
+            return False
+
+        # Remove Torrent File
+        torrent_file['file'].close()
+        #torrent_file.close()
+        os.remove(file_path)
+        log.info('Torrent File removed, file:%s', file_path)
+
+        return True
+    """
 

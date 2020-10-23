@@ -19,11 +19,14 @@
         "noti_delete_otp" : "입력 된 OTP 메시지를 삭제 하였습니다",
         "noti_magnet_link" : "마그넷 링크를 등록하였습니다",
         "noti_torrent_file" : "토렌트 파일(%s)을 등록 하였습니다",
+        "noti_torrent_file_fail" : "토렌트 파일(%s) 등록에 실패하였습니다",
         "noti_not_support_cmd" : "지원 되지 않는 명령입니다",
         "noti_not_torrent_file" : "torrent 파일만 지원합니다, 파일 : %s",
         "noti_torrent_status" : "상태 : %s\n이름 : %s\n크기 : %s\n사용자 : %s",
         "noti_task_list" : "TaskID : %s\n이름 : %s\n크기 : %s\n상태 : %s\n다운로드 됨 : %s\n업로드 됨 : %s\n다운로드 속도 : %s/s\n업로드 속도 : %s/s",
-        "noti_statistic" : "다운로드 스테이션 정보\n다운로드 속도:%s/s\n업로드 속도 : %s/s"
+        "noti_statistic" : "다운로드 스테이션 정보\n다운로드 속도:%s/s\n업로드 속도 : %s/s",
+        "noti_torrent_watch_nothing" : "Torrent Watch 경로가 설정 되지 않았습니다.\nDSM_WATCH 환경 변수 및 볼륨 마운트가 필요합니다.",
+        "noti_torrent_watch_mv_fail" : "Torrent Watch 경로에 파일 이동이 실패 하였습니다"
     },
     "synods" :{
         "task_status" : "상태",
@@ -44,7 +47,7 @@
     },
     "syno_error" : {
         "100" : "100 - 알 수 없는 에러",
-        "101" : "102 - 파라미터에 오류가 있습니다",
+        "101" : "101 - 파라미터에 오류가 있습니다",
         "102" : "102 - 요청한 API가 존재하지 않습니다",
         "103" : "103 - 요청한 기능이 존재하지 않습니다.",
         "104" : "104 - 요청한 버전이 기능을 지원하지 않습니다.",

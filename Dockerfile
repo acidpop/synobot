@@ -1,5 +1,5 @@
 # Synobot Docker build
-# docker build -t synobot:0.9 .
+# docker build -t synobot:0.11 .
 
 FROM python:3-slim
 MAINTAINER Acidpop <https://github.com/acidpop>
@@ -20,6 +20,7 @@ ENV DSM_CERT 1
 ENV DSM_RETRY_LOGIN 10
 ENV DSM_AUTO_DEL 0
 ENV TG_LANG ko_kr
+ENV DSM_WATCH torrent_watch_path
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo "Asia/Seoul" > /etc/timezone
 

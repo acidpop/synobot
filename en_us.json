@@ -19,11 +19,14 @@
         "noti_delete_otp" : "Deleted OTP Message",
         "noti_magnet_link" : "Added task magnet link",
         "noti_torrent_file" : "Added task torrent file(%s).",
+        "noti_torrent_file_fail" : "Added task torrent file(%s) Fail.",
         "noti_not_support_cmd" : "Not support command",
         "noti_not_torrent_file" : "Only torrent files are supported, File : %s",
         "noti_torrent_status" : "*Status* : %s\n*File* : %s\n*Size* : %s\n*User* : %s",
         "noti_task_list" : "TaskID : %s\nFile : %s\nTotal Size : %s\nStatus : %s\nDownload Size : %s\nUpload Size : %s\ndownload Speed : %s/s\nUpload Speed : %s/s",
-        "noti_statistic" : "Info Download Station\nDownload Speed:%s/s\nUpload Speed : %s/s"
+        "noti_statistic" : "Info Download Station\nDownload Speed:%s/s\nUpload Speed : %s/s",
+        "noti_torrent_watch_nothing" : "Torrent Watch path nothing set.\nDSM_WATCH enviroment and Docker volume mount need.",
+        "noti_torrent_watch_mv_fail" : "Torrent Watch Path file move fail."
     },
     "synods" :{
         "task_status" : "Status",

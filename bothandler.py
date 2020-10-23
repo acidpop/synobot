@@ -19,6 +19,8 @@ from LogManager import log
 
 class BotHandler(single.SingletonInstane):
 
+    # Task Monitor Timer Instance
+    dsdown_task_monitor = None
     ds = None
     BotUpdater = None
     bot = None
@@ -82,9 +84,9 @@ class BotHandler(single.SingletonInstane):
         updater.start_polling()
 
         # Download Station Task Monitor
-        dsdown_task_monitor = ThreadTimer.ThreadTimer(10, self.ds.GetTaskList)
+        self.dsdown_task_monitor = ThreadTimer.ThreadTimer(10, self.ds.GetTaskList)
 
-        dsdown_task_monitor.start()
+        self.dsdown_task_monitor.start()
 
         self.StartDsmLogin()
 
@@ -92,6 +94,11 @@ class BotHandler(single.SingletonInstane):
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
         updater.idle()
+
+        self.dsdown_task_monitor.cancel()
+
+    def StopTaskMonitor(self):
+        self.dsdown_task_monitor.cancel()
 
     def CheckValidUser(self, chat_id):
         if not chat_id in self.valid_users:
@@ -379,12 +386,18 @@ class BotHandler(single.SingletonInstane):
         if( file_mime == 'application/x-bittorrent'):
             tor_file = update.message.document.get_file(timeout=5)
             tor_file.download(custom_path=file_path, timeout=5)
-            self.ds.CreateTaskForFile(file_path)
+            
+            #ret = self.ds.CreateTaskForFile(file_path)
+            ret = self.ds.CreateTaskForFileToWatchDir(file_path)
+
             log.info("File Received, file name : %s", file_path)
             
             bot = self.BotUpdater.bot
             #msg = 'Torrent 파일(%s)을 등록 하였습니다' % (file_name)
-            msg = self.lang.GetBotHandlerLang('noti_torrent_file') % (file_name)
+            if ret == True:
+                msg = self.lang.GetBotHandlerLang('noti_torrent_file') % (file_name)
+            else:
+                msg = self.lang.GetBotHandlerLang('noti_torrent_file_fail') % (file_name)
 
             bot.sendMessage(self.cfg.GetDsmPwId(), msg)
         else:
