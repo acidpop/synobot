@@ -4,7 +4,7 @@
 
  - 텔레그램으로 파일 전송시 watch_dir 로 업로드 하도록 기능 변경
 
- - DSM_WATCH 환경 변수 추가, Torrent Watch 경로를 마운트 한 전체 경로명
+ - DSM_WATCH 환경 변수 추가, Torrent Watch 경로를 마운트 한 전체 경로명 [설정 방법](#Torrent-Watch-경로-설정하기)
 
  - "알수 없는 에러" 알림 보내는 부분 수정
 
@@ -192,6 +192,32 @@ synobot 안내 문구 커스터마이징 하기
 7. synobot 도커 재시작
 
 ***
+
+
+## Torrent Watch 경로 설정하기
+
+0.11 버전에서 신규 추가 된 DSM_WATCH 환경 변수를 설정 하는 방법은 다음과 같다.
+
+1. 고급 설정 버튼 클릭
+
+![synobot_config_4](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config4.png)
+
+2. 볼륨 탭 선택 후 폴더 추가 버튼 클릭
+
+![synobot_config_5](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config5.png)
+
+3. Download Station 에서 설정한 watch 경로를 선택
+
+![synobot_config_6](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config6.png)
+
+4. 마운트 경로 부분에 **/tor_watch** 입력
+
+![synobot_config_7](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config7.png)
+
+5. 환경 변수 설정 탭에서 DSM_WATCH 변수의 값에 **/tor_watch** 입력
+
+![synobot_config_8](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config8.png)
+
 
 문의 사항은 github synobot Repository 를 이용해 주세요
 
