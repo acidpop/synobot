@@ -1,7 +1,7 @@
 # Synobot Docker build
-# docker build -t synobot:0.11 .
+# docker build -t synobot:0.12 .
 
-FROM python:3-slim
+FROM python:3.8-slim-buster
 MAINTAINER Acidpop <https://github.com/acidpop>
 
 WORKDIR /synobot
@@ -23,6 +23,9 @@ ENV TG_LANG ko_kr
 ENV DSM_WATCH torrent_watch_path
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo "Asia/Seoul" > /etc/timezone
+
+#RUN apt-get python3-dev libffi-dev gcc && pip3 install --upgrade pip 
+RUN apt-get update && apt-get install -y libffi-dev gcc
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt

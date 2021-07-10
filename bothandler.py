@@ -199,7 +199,8 @@ class BotHandler(single.SingletonInstane):
                 # 105 세션 만료
                 # 400 id 또는 암호 오류
                 # 401 계정 비활성화
-                # 402 2단계 인증 실패
+                # 402, 403, 404 2단계 인증 실패
+
                 if errcode == 105:
                     log.info('105 error, session expired')
                     #bot.sendMessage(self.cfg.GetDsmPwId(), "DSM Login 실패\n세션이 만료되었습니다.")
@@ -216,8 +217,8 @@ class BotHandler(single.SingletonInstane):
                     #bot.sendMessage(self.cfg.GetDsmPwId(), "DSM Login 실패\n비활성화 된 계정입니다.")
                     bot.sendMessage(self.cfg.GetDsmPwId(), self.lang.GetBotHandlerLang('dsm_account_disable'))
                     return False
-                elif errcode == 402:
-                    log.info('402 error, permission denied, try otp auth login')
+                elif errcode == 402 or errcode == 403 or errcode == 404:
+                    log.info('%d error, permission denied, try otp auth login', errcode)
                     self.StartInputOTP()
                     return False
 
