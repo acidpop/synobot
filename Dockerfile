@@ -1,7 +1,7 @@
 # Synobot Docker build
 # docker build -t synobot:0.12 .
 
-FROM python:3.8-slim-buster
+FROM python:3.9.6-buster
 MAINTAINER Acidpop <https://github.com/acidpop>
 
 WORKDIR /synobot
