@@ -364,9 +364,9 @@ class BotHandler(single.SingletonInstane):
 
     def GetOtp(self, update, context):
         if self.CheckValidUser(update.message.from_user.id) == False:
-           return
+            return
 
-        otp_msg = self.OtpHandler.GetOtp()
+        otp_msg = self.otp_handler.GetOtp()
         update.message.reply_text(otp_msg)
         return
 
