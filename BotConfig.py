@@ -40,7 +40,11 @@ class BotConfig(single.SingletonInstane):
     execute_path = ""
     host_name = ''
 
-    # Https 사용시 인증서 무시 여부
+    # OTP Secret Key
+    otp_secret = ''
+
+    # Docker Log print option
+    log_print = False
 
 
     def __init__(self, *args, **kwargs):
@@ -88,6 +92,12 @@ class BotConfig(single.SingletonInstane):
         # DSM_PW 환경변수가 있는 경우에는 Telegram 을 통해 암호를 입력 받는 과정을 생략 한다.
         self.dsm_pw = os.environ.get('DSM_PW', '')
 
+        # DSM_OTP_SECRET 환경변수가 있으면 OTP Code 를 자동으로 생성하여 로그인한다.
+        self.otp_secret = os.environ.get('DSM_OTP_SECRET', '')
+
+        temp_val = os.environ.get('DOCKER_LOG', '1')
+        if temp_val == '1':
+            self.log_print = True
 
     def GetNotifyList(self):
         return self.notify_chat_id_list
@@ -140,3 +150,8 @@ class BotConfig(single.SingletonInstane):
     def GetTorWatch(self):
         return self.tor_watch_path
 
+    def GetLogPrint(self):
+        return self.log_print
+
+    def GetOtpSecret(self):
+        return self.otp_secret

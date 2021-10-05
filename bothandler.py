@@ -12,6 +12,7 @@ import ThreadTimer
 #import systemutil
 import BotConfig
 import synobotLang
+import OtpHandler
 
 from LogManager import log
 
@@ -33,9 +34,11 @@ class BotHandler(single.SingletonInstane):
     lang = None
 
     otp_input = False
-    otp_code = None
+    otp_code = ''
 
     try_login_cnt = 0
+
+    otp_handler = None
 
     # SynoBot Command
     """
@@ -53,6 +56,10 @@ class BotHandler(single.SingletonInstane):
 
         self.lang = synobotLang.synobotLang().instance()
 
+        self.otp_handler = OtpHandler.OtpHandler().instance()
+
+        self.otp_handler.InitOtp(self.cfg.GetOtpSecret())
+
         log.info("Bot Token : %s", self.cfg.GetBotToken())
         updater = Updater(self.cfg.GetBotToken(), use_context=True)
 
@@ -69,6 +76,7 @@ class BotHandler(single.SingletonInstane):
         dp.add_handler(CommandHandler("dslogin", self.dslogin))
         dp.add_handler(CommandHandler("task", self.TaskList))
         dp.add_handler(CommandHandler("stat", self.Statistic))
+        dp.add_handler(CommandHandler("otp", self.GetOtp))
 
         # on noncommand i.e message - echo the message on Telegram
         dp.add_handler(MessageHandler(Filters.text, self.msg_handler))
@@ -128,10 +136,14 @@ class BotHandler(single.SingletonInstane):
         #bot.sendMessage(self.cfg.GetDsmPwId(), "DSM OTP에 표시된 숫자를 입력하세요")
         bot.sendMessage(self.cfg.GetDsmPwId(), self.lang.GetBotHandlerLang('input_login_otp'))
 
-    def StartDsmLogin(self):
+    def StartDsmLogin(self, msg_silent = False):
         retry_cnt = self.cfg.GetDsmRetryLoginCnt()
 
         bot = self.BotUpdater.bot
+
+        retry_msg = ''
+
+        log.info('StartDsmLogin, try_login_cnt:%d, retry_cnt:%d', self.try_login_cnt, retry_cnt)
 
         # 재시도 횟수 까지 로그인을 시도하며, 횟수 초과시 프로그램 종료
         while self.try_login_cnt < retry_cnt:
@@ -141,6 +153,8 @@ class BotHandler(single.SingletonInstane):
             # 3. DS API Login 시도
             # 4. 결과 코드 조회
             # 4-1 반환된 rest api 의 content 값을 보고 판단.
+
+            retry_msg = ' [%d/%d]' % ( self.try_login_cnt + 1, retry_cnt)
 
             # step 1
             # dsm_id 가 비어 있는 경우
@@ -158,12 +172,30 @@ class BotHandler(single.SingletonInstane):
             # step 3
             id = self.cfg.GetDsmId()
             pw = self.cfg.GetDsmPW()
-            otp_code = self.otp_code
-            res, content = self.ds.DsmLogin(id, pw, otp_code)
+
+            # otp_code = self.otp_code
+            # res, content = self.ds.DsmLogin(id, pw, otp_code)
+
+            # otp_code 저장된게 없다면 OtpHandler 에서 OTP Code 를 가져와본다.
+            # OtpHandler 에서도 값이 없다면 그대로 진행
+            if self.otp_code == None or len(self.otp_code) == 0:
+                log.info('none otp')
+                l_otp_code = self.otp_handler.GetOtp()
+                log.info('GetOtp : [%s]', l_otp_code)
+            else:
+                log.info('exist otp')
+                l_otp_code = self.otp_code
+            res, content = self.ds.DsmLogin(id, pw, l_otp_code)
 
             # step 4
             if res == False:
                 log.info('DSM Login fail, API request fail')
+                msg = self.lang.GetBotHandlerLang('dsm_login_fail_msg') % (content)
+
+                msg += retry_msg
+                self.try_login_cnt += 1
+
+                bot.sendMessage(self.cfg.GetDsmPwId(), msg)
                 # 3초 대기 후 재시도
                 time.sleep(3)
                 continue
@@ -176,6 +208,9 @@ class BotHandler(single.SingletonInstane):
                 log.warn("DSM Login Request fail")
                 # msg = '로그인 요청 실패\n, 응답 코드 : %d' % (res.status_code)
                 msg = self.lang.GetBotHandlerLang('dsm_login_api_fail') % (res.status_code)
+
+                msg += retry_msg
+                self.try_login_cnt += 1
                 
                 bot.sendMessage(self.cfg.GetDsmPwId(), msg)
                 time.sleep(3)
@@ -187,8 +222,11 @@ class BotHandler(single.SingletonInstane):
             # json_data 가 None 이라면 DS API 이상, 재시도
             if json_data == None:
                 log.info('DS API Response content is none')
+                msg = self.lang.GetBotHandlerLang('dsm_api_res_empty')
+                msg += retry_msg
+                self.try_login_cnt += 1
                 #bot.sendMessage(self.cfg.GetDsmPwId(), 'DS API 응답 데이터가 비어있습니다')
-                bot.sendMessage(self.cfg.GetDsmPwId(), self.lang.GetBotHandlerLang('dsm_api_res_empty'))
+                bot.sendMessage(self.cfg.GetDsmPwId(), msg)
                 time.sleep(3)
                 continue
 
@@ -219,15 +257,28 @@ class BotHandler(single.SingletonInstane):
                     return False
                 elif errcode == 402 or errcode == 403 or errcode == 404:
                     log.info('%d error, permission denied, try otp auth login', errcode)
+                    if self.otp_handler.GetOtp() != '':
+                        log.info('otp handler instance exist, retry login. [%d/%d]', iself.try_login_cnt+1, retry_cnt)
+                        self.try_login_cnt += 1
+                        continue
+
                     self.StartInputOTP()
                     return False
 
             if json_data['success'] == True:
                 log.info('DSM Login success')
                 self.ds.auth_cookie = content.cookies
+                self.ds.dsm_login_flag = True
                 self.try_login_cnt = 0
+
+                # Login 성공시 id, pw 메모리에 저장
+                self.ds.dsm_id = id
+                self.ds.dsm_pw = pw
+                self.ds.DSMOtpHandler = self.otp_handler
+
                 # bot.sendMessage(self.cfg.GetDsmPwId(), 'DS Login 성공\nSynobot을 시작합니다.')
-                bot.sendMessage(self.cfg.GetDsmPwId(), self.lang.GetBotHandlerLang('dsm_login_succ'))
+                if msg_silent == False:
+                    bot.sendMessage(self.cfg.GetDsmPwId(), self.lang.GetBotHandlerLang('dsm_login_succ'))
                 return True
 
             log.info('retry login... %d/%d', self.try_login_cnt, retry_cnt)
@@ -309,6 +360,14 @@ class BotHandler(single.SingletonInstane):
         update.message.reply_text(self.lang.GetBotHandlerLang('dsm_statistic'))
         self.ds.GetStatistic()
 
+        return
+
+    def GetOtp(self, update, context):
+        if self.CheckValidUser(update.message.from_user.id) == False:
+           return
+
+        otp_msg = self.OtpHandler.GetOtp()
+        update.message.reply_text(otp_msg)
         return
 
     def current_mode_handle(self, update, context):

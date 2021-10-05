@@ -1,4 +1,16 @@
 ***
+### 0.13 (2021/10/05)
+ - OTP 자동입력 기능 추가 [설정 방법](#Otp-설정하기)
+
+ - 로그인 풀리는 경우 자동으로 다시 로그인(ID, PW 까지는 자동 입력, 2단계 인증이 설정 되어 있고 DSM_OTP_SECRET 비밀키까지 입력이 되어 있다면 자동으로 로그인)
+
+ - DSM 연결 실패시 실패 메시지 전송 기능 추가
+
+
+### 0.12 (2021/07/10)
+ - DSM 7.0 에서 OTP 로그인 안되는 오류 수정
+
+
 ### 0.11 (2020/10/23)
  - DSM 7.0 또는 Download Station 을 2020년 10월 20일 전후로 업데이트 한 경우 에 대한 기능 변경
 
@@ -140,6 +152,26 @@ DSM_URL 에 https 사용시 DSM 인증서가 도메인과 일치하지 않는 �
 
 사설 인증서를 사용 한다면 값을 0 으로 사용하시면 됩니다.
 
+**DSM_OTP_SECRET** "VFGW"
+
+DSM 2단계 인증 설정시 비밀 키의 값을 입력
+
+[설정 방법](#Otp-설정하기)
+
+**TZ** *Asia/Seoul*
+
+Synobot 도커가 작동하는 지역의 시간대 설정
+
+링크(https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) 의 *TZ database name* 에 해당 하는 값을 사용
+
+**DOCKER_LOG**
+
+Synobot 도커의 로그를 컨테이너 상세보기의 로그 탭에서 확인 할 수 있도록 설정
+
+1 : 컨테이너 로그 화면에서 확인 가능
+
+0 : 도커 내부의 로그 파일에만 기록
+
 ***
 
 **DSM_PW 환경 변수가 없는 경우에는 synobot 도커가 재시작 될 때마다 텔레그램 봇이 DSM 로그인 암호를 요청합니다.**
@@ -218,6 +250,24 @@ synobot 안내 문구 커스터마이징 하기
 
 ![synobot_config_8](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config8.png)
 
+
+## #Otp 설정하기
+
+0.13 버전에서 신규 추가 된 OTP 자동 입력 기능 설정 방법은 다음과 같다.
+
+1. 게정 설정에서 2단계 인증 추가를 클릭한다.
+
+2. QR 코드 스캔 화면이 나오면 "스캔 할 수 없습니까" 를 클릭한다.
+
+![synobot_config_9](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config9.png)
+
+3. 비밀 키에 해당 하는 값을 기록 해 둔다.
+
+![synobot_config_10](https://raw.githubusercontent.com/acidpop/synobot/master/img/synobot_config10.png)
+
+4. Synobot 의 Docker 세팅시 DSM_OTP_SECRET 환경 변수에 해당 비밀키를 입력한다.
+
+----
 
 문의 사항은 github synobot Repository 를 이용해 주세요
 

@@ -4,6 +4,7 @@
         "input_login_pw" : "Input DSM Login Password\nDelete password after received message",
         "input_login_otp" : "Input DSM OTP Number",
         "dsm_login_api_fail" : "Login fail\n, error code : %d",
+        "dsm_login_fail_msg" : "DSM Login fail\n, %s",
         "dsm_rest_api_fail" : "Request Login fail\n, response code : %d",
         "dsm_api_res_empty" : "DSM API response is empty",
         "dsm_session_expire" : "DSM Login Fail\nsession expired.",

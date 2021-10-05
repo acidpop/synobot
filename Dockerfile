@@ -1,5 +1,5 @@
 # Synobot Docker build
-# docker build -t synobot:0.12 .
+# docker build -t synobot:0.13 .
 
 FROM python:3.9.6-buster
 MAINTAINER Acidpop <https://github.com/acidpop>
@@ -21,8 +21,12 @@ ENV DSM_RETRY_LOGIN 10
 ENV DSM_AUTO_DEL 0
 ENV TG_LANG ko_kr
 ENV DSM_WATCH torrent_watch_path
+ENV DSM_PW=""
+ENV DSM_OTP_SECRET=""
+ENV TZ Asia/Seoul
+ENV DOCKER_LOG 1
 
-RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo "Asia/Seoul" > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 #RUN apt-get python3-dev libffi-dev gcc && pip3 install --upgrade pip 
 RUN apt-get update && apt-get install -y libffi-dev gcc

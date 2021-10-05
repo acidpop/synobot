@@ -1,4 +1,5 @@
 
+import sys
 import logging
 import logging.handlers
 import BotConfig
@@ -17,6 +18,9 @@ log.setLevel(logging.DEBUG)
 
 log_handler = logging.handlers.RotatingFileHandler(LOG_NAME, maxBytes=LOG_SIZE, backupCount=LOG_COUNT)
 log.addHandler(log_handler)
+
+if cfg.GetLogPrint() == True:
+    log.addHandler( logging.StreamHandler(sys.stdout))
 
 formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 

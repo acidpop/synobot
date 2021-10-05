@@ -4,6 +4,7 @@
         "input_login_pw" : "DSM 로그인 비밀번호를 입력하세요\n비밀번호는 수신 후 삭제합니다",
         "input_login_otp" : "DSM OTP에 표시된 숫자를 입력하세요",
         "dsm_login_api_fail" : "로그인 요청 실패\n, 응답 코드 : %d",
+        "dsm_login_fail_msg" : "DSM 로그인 실패\n, %s",
         "dsm_rest_api_fail" : "DSM API 요청 실패\n, 응답 코드 : %s\n%s",
         "dsm_api_res_empty" : "DSM API 응답 데이터가 없습니다",
         "dsm_session_expire" : "DSM Login 실패\n세션이 만료되었습니다.",

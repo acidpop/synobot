@@ -4,6 +4,7 @@ import shutil
 import requests
 import json
 import telegram
+import urllib3
 
 import single
 import CommonUtil
@@ -11,7 +12,7 @@ import bothandler
 import taskmgr
 import BotConfig
 import synobotLang
-
+import OtpHandler
 from LogManager import log
 
 
@@ -40,6 +41,8 @@ class SynoDownloadStation(single.SingletonInstane):
     dsm_otp = ''
     cfg = None
     lang = None
+    dsm_login_flag = False
+    DSMOtpHandler = None
 # 구현 대상
 # 1. Task List 가져오기
 # 2. Magnet 등록 하기
@@ -49,6 +52,8 @@ class SynoDownloadStation(single.SingletonInstane):
         self.theTaskMgr.LoadFile()
         self.cfg = BotConfig.BotConfig().instance()
         self.lang = synobotLang.synobotLang().instance()
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         return
 
     def SendNotifyMessage(self, msg, ParseMode = None):
@@ -64,7 +69,7 @@ class SynoDownloadStation(single.SingletonInstane):
             else:
                 bot.sendMessage(chat_id, msg)
 
-    def ChkTaskResponse(self, result_json, log_body):
+    def ChkTaskResponse(self, result_json, log_body, msg_silent = False):
         if not result_json:
             log.info('check response fail, result json data is empty')
             return False
@@ -82,7 +87,7 @@ class SynoDownloadStation(single.SingletonInstane):
             log.info(msg)
             log.info(result_json)
 
-            if errcode != 100:
+            if errcode != 100 and msg_silent == False:
                 self.SendNotifyMessage(msg)
 
             return False
@@ -131,13 +136,16 @@ class SynoDownloadStation(single.SingletonInstane):
         log.info('Request url : %s', url)
 
         try:
-            res = requests.get(url, params=params, verify=self.cfg.IsUseCert())
+            res = requests.get(url, params=params, verify=self.cfg.IsUseCert(), timeout=30)
         except requests.ConnectionError:
             log.error('Login|synology rest api request Connection Error')
-            return False, None
+            return False, 'Connection error'
+        except requests.exceptions.Timeout:
+            log.error('Login|synology rest api request timeout')
+            return False, 'Connection timeout'
         except:
             log.error('Login|synology requests fail')
-            return False, None
+            return False, 'Unknown Connect Error'
 
         log.info('auth url requests succ')
 
@@ -173,8 +181,15 @@ class SynoDownloadStation(single.SingletonInstane):
 
         json_data = json.loads(res.content.decode('utf-8'))
 
-        if self.ChkTaskResponse(json_data, "GetTaskList Download station api fail") == False:
+        msg_silent = False
+
+        if self.dsm_login_flag == True:
+            msg_silent = True
+
+        if self.ChkTaskResponse(json_data, "GetTaskList Download station api fail", msg_silent) == False:
             self.auth_cookie = None
+            log.info('bothandler StartDsmLogin call')
+            bothandler.BotHandler().instance().StartDsmLogin(msg_silent)
             return False
 
 
