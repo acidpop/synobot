@@ -1,5 +1,3 @@
-[![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=acidpop&theme=nord&locale=kr&show_icons=true)](https://github.com/anuraghazra/github-readme-stats)
-
 ***
 ### 0.13 (2021/10/05)
  - OTP 자동입력 기능 추가 [설정 방법](#Otp-설정하기)
