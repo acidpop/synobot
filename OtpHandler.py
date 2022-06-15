@@ -2,7 +2,7 @@
 
 import single
 import pyotp
-
+from LogManager import log
 
 class OtpHandler(single.SingletonInstane):
     TimeOtp = None
@@ -19,6 +19,10 @@ class OtpHandler(single.SingletonInstane):
         if self.SecretKey == '':
             return ''
 
-        return self.TimeOtp.now()
-
+        try:
+            retVal = self.TimeOtp.now()
+        except Exception as e:
+            retVal = ''
+            log.info('otp except.')
+        return retVal
 

@@ -125,7 +125,7 @@ class SynoDownloadStation(single.SingletonInstane):
 
     def DsmLogin(self, id, pw, otp_code = None):
         url = self.cfg.GetDSDownloadUrl() + '/webapi/auth.cgi'
-        if not otp_code:
+        if otp_code == None or len(otp_code) == 0:
             # Not Use OTP Code
             log.info('without otp')
             params = {'api' : 'SYNO.API.Auth', 'version' : '3', 'method' : 'login' , 'account' : id, 'passwd' : pw, 'session' : 'DownloadStation', 'format' : 'cookie'}
